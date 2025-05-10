@@ -5,13 +5,13 @@ const rateLimit = require('express-rate-limit');
 
 // Import controllers and custom middleware
 const { shortenUrl, redirectUrl, getAllUrls } = require('../controllers/urlController');
+const { getAnalytics, getRawAnalytics } = require('../controllers/analyticsController');
 const validate = require('../middleware/validate');
 
 // Initialize the Express router
 const router = express.Router();
 
 // Specific rate limiter for the shorten route
-// Max 10 requests per 15 minutes per IP
 const shortenLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10,
@@ -21,12 +21,10 @@ const shortenLimiter = rateLimit({
 });
 
 // Route to shorten a new URL
-// Chain of middleware: Rate Limit -> express-validator rules -> custom validate handler -> controller logic
 router.post(
   '/api/shorten',
   shortenLimiter,
   [
-    // Validation rules for originalUrl
     body('originalUrl')
       .notEmpty().withMessage('originalUrl cannot be empty')
       .isURL({ require_protocol: true, protocols: ['http', 'https'] }).withMessage('Must be a valid URL starting with http:// or https://')
@@ -36,11 +34,15 @@ router.post(
   shortenUrl
 );
 
+// Analytics Routes
+// We must place these BEFORE /:code otherwise Express will treat "analytics" as a shortCode!
+router.get('/api/analytics/:code/raw', getRawAnalytics);
+router.get('/api/analytics/:code', getAnalytics);
+
 // Route to get all shortened URLs
 router.get('/api/urls', getAllUrls);
 
 // Route to redirect a short code to its original URL
-// Placed last to act as a catch-all for dynamic :code params
 router.get('/:code', redirectUrl);
 
 module.exports = router;

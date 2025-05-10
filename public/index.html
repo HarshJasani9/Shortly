@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shortly | Paste. Shorten. Share.</title>
+  <style>
+    /* CSS Reset and Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #0f1117; /* Dark background */
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    /* Centered Card Design */
+    .card {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #6b7280;
+      font-size: 1rem;
+    }
+
+    /* Form Styles */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    input[type="url"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="url"]:focus {
+      border-color: #4F46E5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    button.btn-primary {
+      background-color: #4F46E5; /* Indigo */
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      width: 100%;
+    }
+
+    button.btn-primary:hover {
+      background-color: #4338ca;
+    }
+    
+    button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    /* Result Area */
+    .result-container {
+      display: none;
+      margin-top: 20px;
+      padding: 16px;
+      background-color: #f3f4f6;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px dashed #d1d5db;
+    }
+
+    .result-link {
+      display: block;
+      color: #4F46E5;
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    button.btn-copy {
+      background-color: #e5e7eb;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    button.btn-copy:hover {
+      background-color: #d1d5db;
+    }
+
+    .error-message {
+      color: #ef4444; /* Red */
+      font-size: 0.875rem;
+      margin-top: 8px;
+      text-align: center;
+      display: none;
+    }
+
+    /* Recent URLs Table (Below the form) */
+    .recent-urls {
+      margin-top: 40px;
+    }
+
+    .recent-urls h3 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      color: #111827;
+      text-align: center;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 8px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    td {
+      color: #374151;
+    }
+
+    .truncate {
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+    }
+
+    .short-url-link {
+      color: #4F46E5;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="header">
+      <h1>Shortly</h1>
+      <p>Paste. Shorten. Share.</p>
+    </div>
+
+    <!-- Frontend logic interacts entirely via fetch() API requests without reloading -->
+    <form id="shortenForm">
+      <div class="form-group">
+        <input type="url" id="originalUrl" placeholder="Enter long URL (e.g., https://example.com)" required />
+        <button type="submit" id="submitBtn" class="btn-primary">Shorten</button>
+      </div>
+      <div id="errorMessage" class="error-message"></div>
+    </form>
+
+    <div id="resultContainer" class="result-container">
+      <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 4px;">Your short URL is ready:</p>
+      <a href="#" id="shortUrlLink" class="result-link" target="_blank"></a>
+      <button id="copyBtn" class="btn-copy">Copy to Clipboard</button>
+    </div>
+
+    <div class="recent-urls">
+      <h3>Recent Links</h3>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Original URL</th>
+              <th>Short URL</th>
+              <th>Clicks</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="urlsTableBody">
+            <tr>
+              <td colspan="4" style="text-align: center;">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const form = document.getElementById('shortenForm');
+    const input = document.getElementById('originalUrl');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const resultContainer = document.getElementById('resultContainer');
+    const shortUrlLink = document.getElementById('shortUrlLink');
+    const copyBtn = document.getElementById('copyBtn');
+    const urlsTableBody = document.getElementById('urlsTableBody');
+
+    // Load recent URLs on page load
+    document.addEventListener('DOMContentLoaded', fetchRecentUrls);
+
+    // Form Submit Handler
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Prevent full page reload
+
+      const urlValue = input.value.trim();
+      if (!urlValue) return;
+
+      // Reset UI
+      errorMessage.style.display = 'none';
+      resultContainer.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Shortening...';
+
+      try {
+        const response = await fetch('/api/shorten', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ originalUrl: urlValue })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          // Display validation errors if any
+          if (data.errors && data.errors.length > 0) {
+            throw new Error(data.errors[0].message);
+          }
+          throw new Error(data.message || 'Failed to shorten URL');
+        }
+
+        // Show successful result
+        shortUrlLink.href = data.shortUrl;
+        shortUrlLink.textContent = data.shortUrl;
+        resultContainer.style.display = 'block';
+        
+        // Clear input
+        input.value = '';
+
+        // Refresh recent URLs to show the newly created one
+        fetchRecentUrls();
+
+      } catch (error) {
+        errorMessage.textContent = error.message;
+        errorMessage.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Shorten';
+      }
+    });
+
+    // Copy to Clipboard Handler
+    copyBtn.addEventListener('click', async () => {
+      const textToCopy = shortUrlLink.textContent;
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        copyBtn.style.backgroundColor = '#dcfce7'; 
+        copyBtn.style.borderColor = '#86efac';
+        
+        // Reset button appearance after 2 seconds
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.style.backgroundColor = '';
+          copyBtn.style.borderColor = '';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+      }
+    });
+
+    // Fetch and display recent URLs
+    async function fetchRecentUrls() {
+      try {
+        const response = await fetch('/api/urls');
+        if (!response.ok) throw new Error('Failed to fetch URLs');
+        
+        const urls = await response.json();
+        
+        urlsTableBody.innerHTML = '';
+        
+        // Only show last 5 URLs in the UI
+        const recentUrls = urls.slice(0, 5);
+        
+        if (recentUrls.length === 0) {
+          urlsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No URLs shortened yet.</td></tr>';
+          return;
+        }
+
+        recentUrls.forEach(url => {
+          const tr = document.createElement('tr');
+          
+          // Format date
+          const date = new Date(url.createdAt).toLocaleDateString();
+          
+          // Truncate original URL for neat table display
+          const originalUrlCell = `<span class="truncate" title="${url.originalUrl}">${url.originalUrl}</span>`;
+          
+          // Construct clickable short URL link
+          const fullShortUrl = `${window.location.origin}/${url.shortCode}`;
+          const shortUrlCell = `<a href="${fullShortUrl}" class="short-url-link" target="_blank">${url.shortCode}</a>`;
+          
+          tr.innerHTML = `
+            <td>${originalUrlCell}</td>
+            <td>${shortUrlCell}</td>
+            <td>${url.clicks}</td>
+            <td>${date}</td>
+          `;
+          
+          urlsTableBody.appendChild(tr);
+        });
+      } catch (error) {
+        urlsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Failed to load data.</td></tr>';
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
