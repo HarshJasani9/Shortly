@@ -12,7 +12,7 @@ Shortly takes long, unwieldy URLs and turns them into clean, shareable short lin
 - **Asynchronous Analytics:** Tracks devices (Mobile/Desktop/Tablet), browsers, and referrers. Analytics are processed in the background so the user is never kept waiting during a redirect.
 - **Production-Grade Security:** Implements IP-based rate limiting, input validation, and secure HTTP headers via Helmet.
 - **Advanced Data Aggregation:** Uses MongoDB Aggregation Pipelines to efficiently compute time-series click data, top referrers, and device breakdowns.
-- **Minimalist Frontend:** A clean, zero-dependency single-page HTML interface with a dark theme and instant clipboard copying.
+- **Premium Glassmorphism UI:** A beautiful, responsive single-page HTML interface featuring animated mesh gradients and frosted glass elements (no build step required).
 
 ---
 
@@ -34,6 +34,7 @@ This project was built focusing on real-world backend scalability concepts:
 2. **Graceful Fallbacks:** If the Redis server goes down, the `ioredis` offline queue is disabled, instantly throwing an error that the app silently catches. The app seamlessly falls back to MongoDB for redirects—zero downtime.
 3. **Non-Blocking Background Tasks:** When a short link is clicked, the `res.redirect()` fires instantly. The analytics processing (user-agent parsing, click increments, database saves) happens asynchronously in the background using `.catch()` instead of `await`.
 4. **Compound Indexing:** The `Analytics` schema uses a compound index on `{ shortCode: 1, timestamp: -1 }` to make time-series aggregation queries exponentially faster as the database grows.
+5. **Privacy-First Data Fetching:** The frontend utilizes browser `localStorage` to track which URLs a user has generated, passing them to the backend to filter API results. This ensures users only see stats for links they created, achieving privacy without needing a complex authentication system.
 
 ---
 
