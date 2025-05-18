@@ -125,7 +125,16 @@ const redirectUrl = async (req, res, next) => {
  */
 const getAllUrls = async (req, res, next) => {
   try {
-    const urls = await Url.find().sort({ createdAt: -1 });
+    // Privacy feature: Only return URLs that the user explicitly asks for.
+    // If no codes are provided, return an empty array to prevent exposing all links to the public.
+    if (!req.query.codes) {
+      return res.status(200).json([]);
+    }
+
+    const requestedCodes = req.query.codes.split(',');
+    
+    // Fetch only the requested URLs
+    const urls = await Url.find({ shortCode: { $in: requestedCodes } }).sort({ createdAt: -1 });
     let urlsWithCacheStatus = [];
     
     try {

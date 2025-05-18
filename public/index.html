@@ -513,6 +513,14 @@
         // Use flex to display nicely aligned items
         resultContainer.style.display = 'flex';
         
+        // Save the new code to Local Storage for privacy
+        const myLinks = JSON.parse(localStorage.getItem('shortly_links') || '[]');
+        if (!myLinks.includes(data.shortCode)) {
+          myLinks.unshift(data.shortCode);
+          // Keep only the 5 most recent links
+          localStorage.setItem('shortly_links', JSON.stringify(myLinks.slice(0, 5)));
+        }
+        
         input.value = '';
         fetchRecentUrls();
 
@@ -549,13 +557,20 @@
 
     async function fetchRecentUrls() {
       try {
-        const response = await fetch('/api/urls');
+        // Read the user's personal created links from Local Storage
+        const myLinks = JSON.parse(localStorage.getItem('shortly_links') || '[]');
+        
+        if (myLinks.length === 0) {
+          urlsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 40px;">No links created yet. Paste one above!</td></tr>';
+          return;
+        }
+
+        // Fetch ONLY this specific user's links from the backend
+        const response = await fetch(`/api/urls?codes=${myLinks.join(',')}`);
         if (!response.ok) throw new Error('Failed to fetch');
         
-        const urls = await response.json();
+        const recentUrls = await response.json();
         urlsTableBody.innerHTML = '';
-        
-        const recentUrls = urls.slice(0, 5);
         
         if (recentUrls.length === 0) {
           urlsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 40px;">No links created yet. Paste one above!</td></tr>';
