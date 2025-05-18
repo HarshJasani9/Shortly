@@ -5,240 +5,460 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shortly | Paste. Shorten. Share.</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
   <style>
-    /* CSS Reset and Base Styles */
+    /* CSS Reset */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    
+
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --secondary: #ec4899;
+      --bg-dark: #0b0f19;
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
     body {
-      background-color: #0f1117; /* Dark background */
-      color: #333;
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      padding: 40px 20px;
+      padding: 80px 20px;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    /* Centered Card Design */
-    .card {
-      background-color: #ffffff;
+    /* Animated Background Orbs */
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: -1;
+      opacity: 0.4;
+      animation: float 20s infinite alternate ease-in-out;
+    }
+    .orb-1 {
+      top: -100px;
+      left: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+      animation-delay: 0s;
+    }
+    .orb-2 {
+      bottom: -150px;
+      right: -100px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
+      animation-delay: -5s;
+    }
+    .orb-3 {
+      top: 40%;
+      left: 50%;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(40px, 60px) scale(1.1); }
+      100% { transform: translate(-40px, 30px) scale(0.9); }
+    }
+
+    /* Glassmorphism Container */
+    .container {
       width: 100%;
-      max-width: 480px;
-      border-radius: 12px;
-      padding: 32px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      max-width: 640px;
+      z-index: 10;
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      margin-bottom: 40px;
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    @keyframes slideUp {
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 40px;
     }
 
     .header h1 {
-      font-size: 2rem;
+      font-size: 3.5rem;
       font-weight: 800;
-      color: #111827;
-      margin-bottom: 8px;
+      background: linear-gradient(to right, #a855f7, #ec4899, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+      letter-spacing: -1.5px;
     }
 
     .header p {
-      color: #6b7280;
-      font-size: 1rem;
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      font-weight: 400;
     }
 
     /* Form Styles */
-    .form-group {
+    .input-group {
+      position: relative;
+      margin-bottom: 16px;
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 20px;
     }
 
     input[type="url"] {
       width: 100%;
-      padding: 14px 16px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 1rem;
+      padding: 20px 32px;
+      padding-right: 150px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--glass-border);
+      border-radius: 99px;
+      color: white;
+      font-size: 1.05rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: all 0.3s ease;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    input[type="url"]::placeholder {
+      color: #6b7280;
     }
 
     input[type="url"]:focus {
-      border-color: #4F46E5;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+      background: rgba(0, 0, 0, 0.5);
     }
 
-    button.btn-primary {
-      background-color: #4F46E5; /* Indigo */
+    button.btn-shorten {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      bottom: 6px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-size: 1rem;
+      border-radius: 99px;
+      padding: 0 28px;
+      font-size: 1.05rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.2s;
-      width: 100%;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: 'Outfit', sans-serif;
     }
 
-    button.btn-primary:hover {
-      background-color: #4338ca;
+    button.btn-shorten:hover {
+      transform: scale(1.03);
+      box-shadow: 0 10px 20px -10px var(--secondary);
     }
-    
+
+    button.btn-shorten:active {
+      transform: scale(0.97);
+    }
+
     button:disabled {
-      background-color: #9ca3af;
+      opacity: 0.7;
       cursor: not-allowed;
+      transform: none !important;
     }
 
     /* Result Area */
-    .result-container {
-      display: none;
-      margin-top: 20px;
-      padding: 16px;
-      background-color: #f3f4f6;
-      border-radius: 8px;
-      text-align: center;
-      border: 1px dashed #d1d5db;
+    .result-box {
+      display: none; /* Managed by JS */
+      margin-top: 24px;
+      padding: 24px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 20px;
+      align-items: center;
+      justify-content: space-between;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-left {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .result-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
     }
 
     .result-link {
       display: block;
-      color: #4F46E5;
-      font-weight: bold;
-      font-size: 1.1rem;
-      margin-bottom: 12px;
+      color: #e879f9;
+      font-weight: 600;
+      font-size: 1.35rem;
       text-decoration: none;
-      word-break: break-all;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color 0.2s, text-shadow 0.2s;
+    }
+    
+    .result-link:hover {
+      color: #f472b6;
+      text-shadow: 0 0 15px rgba(244, 114, 182, 0.4);
     }
 
     button.btn-copy {
-      background-color: #e5e7eb;
-      color: #374151;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-size: 0.875rem;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 0.95rem;
       font-weight: 500;
       cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     button.btn-copy:hover {
-      background-color: #d1d5db;
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    .error-message {
-      color: #ef4444; /* Red */
-      font-size: 0.875rem;
-      margin-top: 8px;
+    .error-msg {
+      color: #fca5a5;
+      font-size: 0.9rem;
+      margin-top: 16px;
       text-align: center;
       display: none;
+      background: rgba(239, 68, 68, 0.15);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
-    /* Recent URLs Table (Below the form) */
-    .recent-urls {
-      margin-top: 40px;
+    /* Table Styles */
+    .recent-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 0 12px;
     }
-
-    .recent-urls h3 {
-      font-size: 1.1rem;
-      margin-bottom: 12px;
-      color: #111827;
-      text-align: center;
+    
+    .recent-header h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #e5e7eb;
     }
 
     .table-container {
       width: 100%;
       overflow-x: auto;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.875rem;
     }
 
     th, td {
       text-align: left;
-      padding: 12px 8px;
-      border-bottom: 1px solid #e5e7eb;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     th {
-      font-weight: 600;
-      color: #6b7280;
+      font-weight: 500;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: rgba(0, 0, 0, 0.2);
     }
 
-    td {
-      color: #374151;
+    tbody tr {
+      transition: background 0.2s;
     }
 
-    .truncate {
-      max-width: 150px;
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .cell-original {
+      max-width: 220px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      display: inline-block;
+      color: #d1d5db;
     }
 
-    .short-url-link {
-      color: #4F46E5;
+    .cell-short a {
+      color: #a855f7;
       text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .cell-short a:hover {
+      color: #e879f9;
+      text-decoration: underline;
+    }
+
+    .clicks-badge {
+      background: rgba(236, 72, 153, 0.15);
+      color: #f472b6;
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    
+    .cell-date {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    
+    /* Loading Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 6px;
+      height: 20px;
+      width: 100%;
+    }
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .glass-card { padding: 32px 20px; }
+      .header h1 { font-size: 2.5rem; }
+      input[type="url"] { padding-right: 24px; border-radius: 16px; padding: 18px 20px; }
+      .input-group { flex-direction: column; }
+      button.btn-shorten { position: static; width: 100%; margin-top: 12px; padding: 18px; border-radius: 16px; }
+      .result-box { flex-direction: column; text-align: center; gap: 16px; }
+      button.btn-copy { margin-left: 0; width: 100%; justify-content: center; }
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <div class="header">
-      <h1>Shortly</h1>
-      <p>Paste. Shorten. Share.</p>
-    </div>
+  <!-- Animated Background Orbs -->
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
 
-    <!-- Frontend logic interacts entirely via fetch() API requests without reloading -->
-    <form id="shortenForm">
-      <div class="form-group">
-        <input type="url" id="originalUrl" placeholder="Enter long URL (e.g., https://example.com)" required />
-        <button type="submit" id="submitBtn" class="btn-primary">Shorten</button>
+  <div class="container">
+    <!-- Main Shortener Card -->
+    <div class="glass-card">
+      <div class="header">
+        <h1>Shortly</h1>
+        <p>Shorten your links, expand your reach.</p>
       </div>
-      <div id="errorMessage" class="error-message"></div>
-    </form>
 
-    <div id="resultContainer" class="result-container">
-      <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 4px;">Your short URL is ready:</p>
-      <a href="#" id="shortUrlLink" class="result-link" target="_blank"></a>
-      <button id="copyBtn" class="btn-copy">Copy to Clipboard</button>
+      <form id="shortenForm">
+        <div class="input-group">
+          <input type="url" id="originalUrl" placeholder="Paste your long URL here..." required autocomplete="off" />
+          <button type="submit" id="submitBtn" class="btn-shorten">Shorten It</button>
+        </div>
+        <div id="errorMessage" class="error-msg"></div>
+      </form>
+
+      <!-- Results section, hidden by default -->
+      <div id="resultContainer" class="result-box">
+        <div class="result-left">
+          <div class="result-label">Your Short Link</div>
+          <a href="#" id="shortUrlLink" class="result-link" target="_blank"></a>
+        </div>
+        <button id="copyBtn" class="btn-copy">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copy
+        </button>
+      </div>
     </div>
 
-    <div class="recent-urls">
+    <div class="recent-header" style="opacity: 0; animation: slideUp 0.8s 0.2s forwards;">
       <h3>Recent Links</h3>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Original URL</th>
-              <th>Short URL</th>
-              <th>Clicks</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="urlsTableBody">
-            <tr>
-              <td colspan="4" style="text-align: center;">Loading...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    </div>
+    
+    <!-- Analytics Table -->
+    <div class="table-container" style="opacity: 0; animation: slideUp 0.8s 0.3s forwards;">
+      <table>
+        <thead>
+          <tr>
+            <th>Original Link</th>
+            <th>Short Link</th>
+            <th>Clicks</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="urlsTableBody">
+          <!-- Skeleton Loading States -->
+          <tr>
+            <td><div class="skeleton"></div></td>
+            <td><div class="skeleton" style="width: 80%"></div></td>
+            <td><div class="skeleton" style="width: 40px; border-radius: 99px"></div></td>
+            <td><div class="skeleton" style="width: 60%"></div></td>
+          </tr>
+          <tr>
+            <td><div class="skeleton"></div></td>
+            <td><div class="skeleton" style="width: 80%"></div></td>
+            <td><div class="skeleton" style="width: 40px; border-radius: 99px"></div></td>
+            <td><div class="skeleton" style="width: 60%"></div></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
   <script>
-    // DOM Elements
     const form = document.getElementById('shortenForm');
     const input = document.getElementById('originalUrl');
     const submitBtn = document.getElementById('submitBtn');
@@ -248,21 +468,24 @@
     const copyBtn = document.getElementById('copyBtn');
     const urlsTableBody = document.getElementById('urlsTableBody');
 
+    // Reusable SVG Icons for the copy button
+    const copyIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy';
+    const checkIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!';
+
     // Load recent URLs on page load
     document.addEventListener('DOMContentLoaded', fetchRecentUrls);
 
-    // Form Submit Handler
     form.addEventListener('submit', async (e) => {
-      e.preventDefault(); // Prevent full page reload
-
+      e.preventDefault();
+      
       const urlValue = input.value.trim();
       if (!urlValue) return;
 
-      // Reset UI
+      // Reset UI state
       errorMessage.style.display = 'none';
       resultContainer.style.display = 'none';
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Shortening...';
+      submitBtn.textContent = '...';
 
       try {
         const response = await fetch('/api/shorten', {
@@ -274,22 +497,23 @@
         const data = await response.json();
 
         if (!response.ok) {
-          // Display validation errors if any
-          if (data.errors && data.errors.length > 0) {
-            throw new Error(data.errors[0].message);
-          }
+          if (data.errors && data.errors.length > 0) throw new Error(data.errors[0].message);
           throw new Error(data.message || 'Failed to shorten URL');
         }
 
-        // Show successful result
         shortUrlLink.href = data.shortUrl;
         shortUrlLink.textContent = data.shortUrl;
-        resultContainer.style.display = 'block';
         
-        // Clear input
+        // Reset copy button visual state
+        copyBtn.innerHTML = copyIcon;
+        copyBtn.style.background = '';
+        copyBtn.style.borderColor = '';
+        copyBtn.style.color = '';
+        
+        // Use flex to display nicely aligned items
+        resultContainer.style.display = 'flex';
+        
         input.value = '';
-
-        // Refresh recent URLs to show the newly created one
         fetchRecentUrls();
 
       } catch (error) {
@@ -297,74 +521,67 @@
         errorMessage.style.display = 'block';
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Shorten';
+        submitBtn.textContent = 'Shorten It';
       }
     });
 
-    // Copy to Clipboard Handler
     copyBtn.addEventListener('click', async () => {
-      const textToCopy = shortUrlLink.textContent;
       try {
-        await navigator.clipboard.writeText(textToCopy);
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = 'Copied!';
-        copyBtn.style.backgroundColor = '#dcfce7'; 
-        copyBtn.style.borderColor = '#86efac';
+        await navigator.clipboard.writeText(shortUrlLink.textContent);
         
-        // Reset button appearance after 2 seconds
+        // Success state styling
+        copyBtn.innerHTML = checkIcon;
+        copyBtn.style.background = 'rgba(16, 185, 129, 0.15)';
+        copyBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        copyBtn.style.color = '#10b981';
+        
+        // Revert back after 2 seconds
         setTimeout(() => {
-          copyBtn.textContent = originalText;
-          copyBtn.style.backgroundColor = '';
+          copyBtn.innerHTML = copyIcon;
+          copyBtn.style.background = '';
           copyBtn.style.borderColor = '';
+          copyBtn.style.color = '';
         }, 2000);
       } catch (err) {
         console.error('Failed to copy: ', err);
       }
     });
 
-    // Fetch and display recent URLs
     async function fetchRecentUrls() {
       try {
         const response = await fetch('/api/urls');
-        if (!response.ok) throw new Error('Failed to fetch URLs');
+        if (!response.ok) throw new Error('Failed to fetch');
         
         const urls = await response.json();
-        
         urlsTableBody.innerHTML = '';
         
-        // Only show last 5 URLs in the UI
         const recentUrls = urls.slice(0, 5);
         
         if (recentUrls.length === 0) {
-          urlsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No URLs shortened yet.</td></tr>';
+          urlsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 40px;">No links created yet. Paste one above!</td></tr>';
           return;
         }
 
-        recentUrls.forEach(url => {
+        // Generate rows with staggered fade-in animations
+        recentUrls.forEach((url, i) => {
           const tr = document.createElement('tr');
+          tr.style.animation = `fadeIn 0.4s ${i * 0.1}s ease forwards`;
+          tr.style.opacity = '0';
           
-          // Format date
-          const date = new Date(url.createdAt).toLocaleDateString();
-          
-          // Truncate original URL for neat table display
-          const originalUrlCell = `<span class="truncate" title="${url.originalUrl}">${url.originalUrl}</span>`;
-          
-          // Construct clickable short URL link
+          const date = new Date(url.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
           const fullShortUrl = `${window.location.origin}/${url.shortCode}`;
-          const shortUrlCell = `<a href="${fullShortUrl}" class="short-url-link" target="_blank">${url.shortCode}</a>`;
           
           tr.innerHTML = `
-            <td>${originalUrlCell}</td>
-            <td>${shortUrlCell}</td>
-            <td>${url.clicks}</td>
-            <td>${date}</td>
+            <td><div class="cell-original" title="${url.originalUrl}">${url.originalUrl}</div></td>
+            <td class="cell-short"><a href="${fullShortUrl}" target="_blank">${url.shortCode}</a></td>
+            <td><span class="clicks-badge">${url.clicks.toLocaleString()}</span></td>
+            <td class="cell-date">${date}</td>
           `;
           
           urlsTableBody.appendChild(tr);
         });
       } catch (error) {
-        urlsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Failed to load data.</td></tr>';
-        console.error(error);
+        urlsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #fca5a5; padding: 40px;">Failed to load recent links.</td></tr>';
       }
     }
   </script>
